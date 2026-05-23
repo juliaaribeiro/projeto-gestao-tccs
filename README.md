@@ -75,4 +75,16 @@ O endpoint `/api/tccs/estatisticas/` retorna:
 
 Para visualização das informações acesse os endpoints, como o exemplo: [http://127.0.0.1:8000/api/](http://127.0.0.1:8000/api/).
 
+## Frontend Vue.js
+
+O frontend está disponível na pasta `frontend/`. Para executá-lo:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+O frontend consome a API em `http://127.0.0.1:8000/api/` e suporta upload de PDF via `FormData`.
+
 **Dica para o Frontend:** Lembre-se que para o upload de arquivos você não envia um JSON comum, mas sim um objeto `FormData`.

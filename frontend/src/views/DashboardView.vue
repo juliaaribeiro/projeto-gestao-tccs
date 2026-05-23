@@ -1,0 +1,185 @@
+<template>
+  <div class="dashboard">
+
+    <!-- Hero banner -->
+    <section class="hero card">
+      <div class="hero-content">
+        <h1 class="hero-title">Dashboard</h1>
+        <p class="hero-subtitle">Visão geral do sistema de Gestão de TCCs</p>
+      </div>
+      <div class="hero-meta">
+        <span class="hero-date">{{ today }}</span>
+      </div>
+    </section>
+
+    <!-- Stat cards -->
+    <div class="stat-cards">
+      <div v-for="s in statItems" :key="s.label" class="stat-card">
+        <div class="stat-icon" :style="{ background: s.bg }">{{ s.icon }}</div>
+        <div>
+          <div class="stat-label">{{ s.label }}</div>
+          <div class="stat-value">{{ s.value ?? '—' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <BarChart
+        title="TCCs por Status"
+        :labels="statusLabels"
+        :values="statusValues"
+        type="doughnut"
+      />
+
+      <BarChart
+        title="Top 10 Orientadores"
+        :labels="orientadorLabels"
+        :values="orientadorValues"
+        :horizontal="true"
+      />
+    </div>
+
+  </div>
+</template>
+
+<script>
+import { computed, onMounted, ref } from 'vue'
+import BarChart from '../components/BarChart.vue'
+import api, { fetchList } from '../services/api'
+
+export default {
+  components: { BarChart },
+
+  setup() {
+    const stats  = ref({ total_geral: 0, por_status: {}, por_orientador: {} })
+    const counts = ref({ alunos: 0, professores: 0, cursos: 0, departamentos: 0 })
+
+    const today = new Date().toLocaleDateString('pt-BR', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    })
+
+    const loadStats = async () => {
+      try {
+        const { data } = await api.get('/tccs/estatisticas/')
+        stats.value = data
+      } catch (e) { console.error('Erro ao carregar estatísticas', e) }
+    }
+
+    const loadCounts = async () => {
+      try {
+        const [a, p, c, d] = await Promise.all([
+          fetchList('/alunos/'),
+          fetchList('/professores/'),
+          fetchList('/cursos/'),
+          fetchList('/departamentos/'),
+        ])
+        counts.value = {
+          alunos:       a.count ?? (a.results?.length ?? a.length ?? 0),
+          professores:  p.count ?? (p.results?.length ?? p.length ?? 0),
+          cursos:       c.count ?? (c.results?.length ?? c.length ?? 0),
+          departamentos:d.count ?? (d.results?.length ?? d.length ?? 0),
+        }
+      } catch (e) { console.error('Erro ao carregar contagens', e) }
+    }
+
+    onMounted(() => Promise.all([loadStats(), loadCounts()]))
+
+    const statItems = computed(() => [
+      {
+        icon: '📄', label: 'TCCs', value: stats.value.total_geral,
+        bg: 'linear-gradient(135deg,rgba(99,102,241,.28),rgba(139,92,246,.22))',
+      },
+      {
+        icon: '🎓', label: 'Alunos', value: counts.value.alunos,
+        bg: 'linear-gradient(135deg,rgba(139,92,246,.25),rgba(244,63,94,.18))',
+      },
+      {
+        icon: '👩‍🏫', label: 'Professores', value: counts.value.professores,
+        bg: 'linear-gradient(135deg,rgba(6,182,212,.25),rgba(99,102,241,.22))',
+      },
+      {
+        icon: '📚', label: 'Cursos', value: counts.value.cursos,
+        bg: 'linear-gradient(135deg,rgba(16,185,129,.25),rgba(6,182,212,.22))',
+      },
+      {
+        icon: '🏢', label: 'Departamentos', value: counts.value.departamentos,
+        bg: 'linear-gradient(135deg,rgba(245,158,11,.25),rgba(244,63,94,.18))',
+      },
+    ])
+
+    const statusLabels = computed(() => Object.keys(stats.value.por_status || {}))
+    const statusValues = computed(() => Object.values(stats.value.por_status || {}))
+
+    /* top 10 orientadores ordenados por quantidade */
+    const orientadorEntries = computed(() =>
+      Object.entries(stats.value.por_orientador || {})
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+    )
+    const orientadorLabels = computed(() => orientadorEntries.value.map(([k]) => k))
+    const orientadorValues = computed(() => orientadorEntries.value.map(([, v]) => v))
+
+    return {
+      stats, counts, statItems, today,
+      statusLabels, statusValues,
+      orientadorLabels, orientadorValues,
+    }
+  },
+}
+</script>
+
+<style scoped>
+.dashboard { display: flex; flex-direction: column; gap: 24px; }
+
+/* ── Hero ── */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(99,102,241,0.16) 0%,
+    rgba(139,92,246,0.12) 50%,
+    rgba(6,182,212,0.07) 100%
+  );
+  border-color: rgba(99,102,241,0.22);
+}
+
+.hero-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  margin-bottom: 5px;
+  background: linear-gradient(135deg, #e8f4ff 30%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle { color: var(--text-2); font-size: 0.9rem; }
+
+.hero-date {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+/* ── Charts ── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+@media (max-width: 920px) {
+  .charts-grid { grid-template-columns: 1fr; }
+  .hero-meta   { display: none; }
+}
+</style>
