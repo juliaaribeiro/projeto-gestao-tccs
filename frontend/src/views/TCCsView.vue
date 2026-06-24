@@ -17,7 +17,8 @@
           <span>➕</span> Novo TCC
         </h3>
         <div class="alert">
-          Preencha todos os campos obrigatórios e anexe o arquivo PDF do trabalho.
+          Digite o nome do aluno e dos professores. Se algum nome ainda não estiver
+          cadastrado, os campos extras necessários vão aparecer automaticamente.
         </div>
 
         <form class="form-grid form-two-col" @submit.prevent="createTCC">
@@ -68,61 +69,74 @@
             </select>
           </label>
 
-          <label>
-            Aluno
-            <select v-model.number="form.aluno" required>
-              <option disabled value="">Selecione o aluno</option>
-              <option v-for="a in alunos" :key="a.id" :value="a.id">{{ a.nome }} ({{ a.matricula }})</option>
-            </select>
-          </label>
+          <!-- ── Pessoas (texto livre, maiúsculas, criação automática) ── -->
+          <PersonPicker
+            ref="alunoPicker"
+            label="Aluno"
+            tipo="aluno"
+            v-model="form.aluno"
+            :opcoes="alunos"
+            :cursos="cursos"
+            placeholder="Nome do aluno"
+          />
 
-          <label>
-            Orientador
-            <select v-model.number="form.orientador" required>
-              <option disabled value="">Selecione o orientador</option>
-              <option v-for="p in professores" :key="p.id" :value="p.id">{{ p.nome }}</option>
-            </select>
-          </label>
+          <PersonPicker
+            ref="orientadorPicker"
+            label="Orientador"
+            tipo="professor"
+            v-model="form.orientador"
+            :opcoes="professores"
+            :departamentos="departamentos"
+            placeholder="Nome do orientador"
+          />
 
-          <label>
-            Coorientador
-            <select v-model.number="form.coorientador">
-              <option value="">Nenhum</option>
-              <option v-for="p in professores" :key="p.id" :value="p.id">{{ p.nome }}</option>
-            </select>
-          </label>
+          <PersonPicker
+            ref="coorientadorPicker"
+            label="Coorientador (opcional)"
+            tipo="professor"
+            v-model="form.coorientador"
+            :opcoes="professores"
+            :departamentos="departamentos"
+            placeholder="Nome do coorientador"
+          />
 
-          <label>
-            Presidente da Banca
-            <select v-model.number="form.presidente" required>
-              <option disabled value="">Selecione</option>
-              <option v-for="p in professores" :key="p.id" :value="p.id">{{ p.nome }}</option>
-            </select>
-          </label>
+          <PersonPicker
+            ref="presidentePicker"
+            label="Presidente da Banca"
+            tipo="professor"
+            v-model="form.presidente"
+            :opcoes="professores"
+            :departamentos="departamentos"
+            placeholder="Nome do presidente"
+          />
 
-          <label>
-            1º Membro da Banca
-            <select v-model.number="form.primeiro_membro" required>
-              <option disabled value="">Selecione</option>
-              <option v-for="p in professores" :key="p.id" :value="p.id">{{ p.nome }}</option>
-            </select>
-          </label>
+          <PersonPicker
+            ref="membro1Picker"
+            label="1º Membro da Banca"
+            tipo="professor"
+            v-model="form.primeiro_membro"
+            :opcoes="professores"
+            :departamentos="departamentos"
+            placeholder="Nome do 1º membro"
+          />
 
-          <label>
-            2º Membro da Banca
-            <select v-model.number="form.segundo_membro" required>
-              <option disabled value="">Selecione</option>
-              <option v-for="p in professores" :key="p.id" :value="p.id">{{ p.nome }}</option>
-            </select>
-          </label>
+          <PersonPicker
+            ref="membro2Picker"
+            label="2º Membro da Banca"
+            tipo="professor"
+            v-model="form.segundo_membro"
+            :opcoes="professores"
+            :departamentos="departamentos"
+            placeholder="Nome do 2º membro"
+          />
 
           <label class="col-span-2">
             Arquivo PDF
             <input type="file" accept="application/pdf" @change="handleFileUpload" />
           </label>
 
-          <button class="primary-button col-span-2" type="submit">
-            ✓ &nbsp;Cadastrar TCC
+          <button class="primary-button col-span-2" type="submit" :disabled="submitting">
+            {{ submitting ? '⏳ Salvando...' : '✓ Cadastrar TCC' }}
           </button>
         </form>
       </section>
@@ -195,16 +209,29 @@
 <script>
 import { onMounted, ref } from 'vue'
 import { fetchList, patchItem, postItem } from '../services/api'
+import PersonPicker from '../components/PersonPicker.vue'
 
 export default {
+  components: { PersonPicker },
   setup() {
-    const tccs        = ref([])
-    const alunos      = ref([])
-    const professores = ref([])
-    const alunoMap    = ref({})
-    const professorMap= ref({})
-    const editStatus  = ref({})
-    const file        = ref(null)
+    const tccs          = ref([])
+    const alunos        = ref([])
+    const professores   = ref([])
+    const cursos         = ref([])
+    const departamentos  = ref([])
+    const alunoMap      = ref({})
+    const professorMap  = ref({})
+    const editStatus    = ref({})
+    const file           = ref(null)
+    const submitting     = ref(false)
+
+    // Refs dos PersonPickers — usados pra confirmar/criar a pessoa antes de enviar o TCC
+    const alunoPicker        = ref(null)
+    const orientadorPicker    = ref(null)
+    const coorientadorPicker  = ref(null)
+    const presidentePicker    = ref(null)
+    const membro1Picker       = ref(null)
+    const membro2Picker       = ref(null)
 
     const statusOptions = [
       { value: '0', label: 'Em Elaboração' },
@@ -214,10 +241,10 @@ export default {
     ]
 
     const tipoOptions = [
-      { value: 'MONOGRAFIA',       label: 'Monografia'          },
-      { value: 'RELATORIO_ESTAGIO',label: 'Relatório de Estágio'},
-      { value: 'RELATORIO_TECNICO', label: 'Relatório Técnico'  },
-      { value: 'ARTIGO',           label: 'Artigo'              },
+      { value: 'MONOGRAFIA',        label: 'Monografia'           },
+      { value: 'RELATORIO_ESTAGIO', label: 'Relatório de Estágio' },
+      { value: 'RELATORIO_TECNICO', label: 'Relatório Técnico'    },
+      { value: 'ARTIGO',            label: 'Artigo'               },
     ]
 
     const idiomaOptions = [
@@ -241,13 +268,16 @@ export default {
 
     /* ── Loaders ── */
     const loadAuxiliaryData = async () => {
-      const [ar, pr] = await Promise.all([
+      const [ar, pr, cr, dr] = await Promise.all([
         fetchList('/alunos/'), fetchList('/professores/'),
+        fetchList('/cursos/'), fetchList('/departamentos/'),
       ])
-      alunos.value     = ar.results || ar
-      professores.value= pr.results || pr
-      alunoMap.value   = alunos.value.reduce((acc, a) => { acc[a.id] = `${a.nome} (${a.matricula})`; return acc }, {})
-      professorMap.value= professores.value.reduce((acc, p) => { acc[p.id] = p.nome; return acc }, {})
+      alunos.value       = ar.results || ar
+      professores.value  = pr.results || pr
+      cursos.value        = cr.results || cr
+      departamentos.value = dr.results || dr
+      alunoMap.value     = alunos.value.reduce((acc, a) => { acc[a.id] = `${a.nome} (${a.matricula})`; return acc }, {})
+      professorMap.value = professores.value.reduce((acc, p) => { acc[p.id] = p.nome; return acc }, {})
     }
 
     const loadTCCs = async () => {
@@ -264,21 +294,54 @@ export default {
     const handleFileUpload = (e) => { file.value = e.target.files[0] || null }
 
     const createTCC = async () => {
-      const fd = new FormData()
-      Object.entries(form.value).forEach(([k, v]) => {
-        if (v !== '' && v !== null) fd.append(k, v)
-      })
-      if (file.value) fd.append('arquivo', file.value)
-
+      submitting.value = true
       try {
+        // Confirma/cria cada pessoa antes de montar o payload do TCC.
+        // Coorientador é opcional: só confirma se algo foi digitado.
+        const [alunoId, orientadorId, presidenteId, membro1Id, membro2Id] = await Promise.all([
+          alunoPicker.value.confirmar(),
+          orientadorPicker.value.confirmar(),
+          presidentePicker.value.confirmar(),
+          membro1Picker.value.confirmar(),
+          membro2Picker.value.confirmar(),
+        ])
+        const coorientadorId = coorientadorPicker.value.query
+          ? await coorientadorPicker.value.confirmar()
+          : ''
+
+        if (!alunoId || !orientadorId || !presidenteId || !membro1Id || !membro2Id) {
+          window.alert('Preencha todos os nomes obrigatórios (aluno, orientador e banca completa).')
+          return
+        }
+
+        form.value.aluno = alunoId
+        form.value.orientador = orientadorId
+        form.value.coorientador = coorientadorId
+        form.value.presidente = presidenteId
+        form.value.primeiro_membro = membro1Id
+        form.value.segundo_membro = membro2Id
+
+        const fd = new FormData()
+        Object.entries(form.value).forEach(([k, v]) => {
+          if (v !== '' && v !== null) fd.append(k, v)
+        })
+        if (file.value) fd.append('arquivo', file.value)
+
         await postItem('/tccs/', fd, true)
-        await loadTCCs()
+        await Promise.all([loadTCCs(), loadAuxiliaryData()])
+
         form.value = emptyForm()
         file.value = null
+        ;[alunoPicker, orientadorPicker, coorientadorPicker, presidentePicker, membro1Picker, membro2Picker]
+          .forEach(p => p.value && p.value.limpar())
+
         window.alert('TCC cadastrado com sucesso! ✓')
       } catch (e) {
         console.error(e)
-        window.alert('Falha ao cadastrar TCC. Verifique os dados.')
+        const msg = e.response?.data?.erro || 'Falha ao cadastrar TCC. Verifique os dados.'
+        window.alert(msg)
+      } finally {
+        submitting.value = false
       }
     }
 
@@ -307,9 +370,10 @@ export default {
       statusOptions.find(o => o.value === String(s))?.label || s
 
     return {
-      tccs, alunos, professores, form,
+      tccs, alunos, professores, cursos, departamentos, form,
       statusOptions, tipoOptions, idiomaOptions, semestreOptions,
-      editStatus, alunoMap, professorMap,
+      editStatus, alunoMap, professorMap, submitting,
+      alunoPicker, orientadorPicker, coorientadorPicker, presidentePicker, membro1Picker, membro2Picker,
       handleFileUpload, createTCC, updateStatus,
       fileUrl, statusClass, statusLabel,
     }

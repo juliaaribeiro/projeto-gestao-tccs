@@ -15,10 +15,14 @@ class UnidadeAcademicaViewSet(viewsets.ModelViewSet):
 class DepartamentoViewSet(viewsets.ModelViewSet):
     queryset = Departamento.objects.all()
     serializer_class = DepartamentoSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['nome', 'sigla']
 
 class CursoViewSet(viewsets.ModelViewSet):
     queryset = Curso.objects.all()
     serializer_class = CursoSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['nome', 'sigla', 'codigo']
 
 class AlunoViewSet(viewsets.ModelViewSet):
     queryset = Aluno.objects.all()
@@ -26,11 +30,67 @@ class AlunoViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ['nome', 'matricula']
 
+    @action(detail=False, methods=['post'])
+    def buscar_ou_criar(self, request):
+        """
+        Recebe {nome, matricula?, curso?}. Se já existir um aluno com
+        esse nome (case-insensitive), retorna ele. Caso contrário,
+        cria um novo (matricula e curso são obrigatórios para criar).
+        """
+        nome = (request.data.get('nome') or '').strip().upper()
+        if not nome:
+            return Response({'erro': 'Nome é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        existente = Aluno.objects.filter(nome__iexact=nome).first()
+        if existente:
+            return Response(AlunoSerializer(existente).data)
+
+        matricula = (request.data.get('matricula') or '').strip()
+        curso_id = request.data.get('curso')
+
+        if not matricula or not curso_id:
+            return Response(
+                {'erro': 'Aluno novo: matrícula e curso são obrigatórios.', 'novo': True},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = AlunoSerializer(data={'nome': nome, 'matricula': matricula, 'curso': curso_id})
+        serializer.is_valid(raise_exception=True)
+        aluno = serializer.save()
+        return Response(AlunoSerializer(aluno).data, status=status.HTTP_201_CREATED)
+
 class ProfessorViewSet(viewsets.ModelViewSet):
     queryset = Professor.objects.all()
     serializer_class = ProfessorSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['nome']
+
+    @action(detail=False, methods=['post'])
+    def buscar_ou_criar(self, request):
+        """
+        Recebe {nome, departamento?}. Se já existir um professor com
+        esse nome (case-insensitive), retorna ele. Caso contrário,
+        cria um novo (departamento é obrigatório para criar).
+        """
+        nome = (request.data.get('nome') or '').strip().upper()
+        if not nome:
+            return Response({'erro': 'Nome é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        existente = Professor.objects.filter(nome__iexact=nome).first()
+        if existente:
+            return Response(ProfessorSerializer(existente).data)
+
+        departamento_id = request.data.get('departamento')
+        if not departamento_id:
+            return Response(
+                {'erro': 'Professor novo: departamento é obrigatório.', 'novo': True},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = ProfessorSerializer(data={'nome': nome, 'departamento': departamento_id})
+        serializer.is_valid(raise_exception=True)
+        professor = serializer.save()
+        return Response(ProfessorSerializer(professor).data, status=status.HTTP_201_CREATED)
 
 class TCCViewSet(viewsets.ModelViewSet):
     queryset = TCC.objects.all()

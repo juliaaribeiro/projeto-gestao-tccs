@@ -161,3 +161,9 @@ cython_debug/
 
 code/
 TODO.md
+
+# Node / Frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+package-lock.json

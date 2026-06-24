@@ -21,10 +21,16 @@ class AlunoSerializer(serializers.ModelSerializer):
         model = Aluno
         fields = '__all__'
 
+    def validate_nome(self, value):
+        return value.strip().upper()
+
 class ProfessorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Professor
         fields = '__all__'
+
+    def validate_nome(self, value):
+        return value.strip().upper()
 
 class TCCSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
@@ -34,3 +40,6 @@ class TCCSerializer(serializers.ModelSerializer):
     class Meta:
         model = TCC
         fields = '__all__'
+
+    def validate_titulo(self, value):
+        return value.strip().upper()
