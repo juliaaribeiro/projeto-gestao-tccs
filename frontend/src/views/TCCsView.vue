@@ -1,9 +1,10 @@
 <template>
   <div class="tccs-page">
 
-    <!-- Header -->
+    <!-- HEADER -->
     <div class="page-header card">
       <div class="header-content">
+
         <div>
           <h1 class="page-title">Controle de TCCs</h1>
           <p class="page-subtitle">
@@ -14,14 +15,27 @@
         <button class="primary-button" @click="goToTCCForm">
           + Cadastrar novo TCC
         </button>
+
       </div>
     </div>
 
-    <!-- Lista -->
+    <!-- SEARCH -->
+    <div class="search-bar">
+      <input
+        v-model="search"
+        type="text"
+        class="search-input"
+        placeholder="🔍 Buscar TCC por título, aluno ou orientador..."
+      />
+    </div>
+
+    <!-- LIST -->
     <section class="card list-section">
 
       <div class="list-header">
-        <span class="entity-count">{{ tccs.length }} registros</span>
+        <span class="entity-count">
+          {{ filteredTCCs.length }} registros
+        </span>
       </div>
 
       <div class="table-wrapper">
@@ -37,13 +51,13 @@
           </thead>
 
           <tbody>
-            <tr v-for="tcc in tccs" :key="tcc.id">
+            <tr v-for="tcc in filteredTCCs" :key="tcc.id">
 
               <td class="tcc-title-cell">{{ tcc.titulo }}</td>
               <td>{{ alunoMap[tcc.aluno] || tcc.aluno }}</td>
               <td>{{ professorMap[tcc.orientador] || tcc.orientador }}</td>
 
-              <!-- STATUS CLICK-TO-EDIT -->
+              <!-- STATUS CLICK -->
               <td>
                 <div class="status-cell">
 
@@ -91,9 +105,9 @@
 
             </tr>
 
-            <tr v-if="tccs.length === 0">
+            <tr v-if="filteredTCCs.length === 0">
               <td colspan="5" class="center-cell">
-                Nenhum TCC cadastrado.
+                Nenhum TCC encontrado.
               </td>
             </tr>
 
@@ -102,11 +116,12 @@
       </div>
 
     </section>
+
   </div>
 </template>
 
 <script>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchList, patchItem } from '../services/api'
 
@@ -115,6 +130,8 @@ export default {
     const router = useRouter()
 
     const tccs = ref([])
+    const search = ref('')
+
     const alunos = ref([])
     const professores = ref([])
 
@@ -131,10 +148,12 @@ export default {
       { value: '3', label: 'Reprovado' },
     ]
 
+    /* NAV */
     const goToTCCForm = () => {
       router.push('/tccs/novo')
     }
 
+    /* LOAD AUX */
     const loadAuxiliaryData = async () => {
       const [ar, pr] = await Promise.all([
         fetchList('/alunos/'),
@@ -153,6 +172,7 @@ export default {
       )
     }
 
+    /* LOAD TCCS */
     const loadTCCs = async () => {
       const res = await fetchList('/tccs/')
       tccs.value = res.results || res
@@ -164,6 +184,25 @@ export default {
 
     onMounted(async () => {
       await Promise.all([loadAuxiliaryData(), loadTCCs()])
+    })
+
+    /* SEARCH FILTER */
+    const filteredTCCs = computed(() => {
+      if (!search.value) return tccs.value
+
+      const q = search.value.toLowerCase()
+
+      return tccs.value.filter(tcc => {
+        const titulo = (tcc.titulo || '').toLowerCase()
+        const aluno = (alunoMap.value[tcc.aluno] || '').toLowerCase()
+        const orientador = (professorMap.value[tcc.orientador] || '').toLowerCase()
+
+        return (
+          titulo.includes(q) ||
+          aluno.includes(q) ||
+          orientador.includes(q)
+        )
+      })
     })
 
     /* STATUS INLINE */
@@ -198,18 +237,28 @@ export default {
 
     return {
       tccs,
+      search,
+      filteredTCCs,
+
       alunoMap,
       professorMap,
+
       editStatus,
       editingStatus,
+
       statusOptions,
+
       goToTCCForm,
       openStatus,
       closeStatus,
       saveStatus,
+
       statusClass,
       statusLabel,
     }
   },
 }
 </script>
+
+
+

@@ -412,3 +412,41 @@ button {
   user-select: none;
 }
 
+.search-bar {
+  margin-bottom: 18px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-size: 0.95rem;
+  background: var(--surface-1);
+  color: var(--text-1);
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+.tcc-title-cell {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-select {
+  padding: 6px;
+  border-radius: 6px;
+}
+
