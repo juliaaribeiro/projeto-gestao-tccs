@@ -4,6 +4,7 @@
     apiPath="/departamentos/"
     :columns="columns"
     :relatedMaps="{ unidade_academica: unidadesMap }"
+    searchField="search"
   />
 </template>
 
