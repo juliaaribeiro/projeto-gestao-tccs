@@ -1,6 +1,7 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.db.models import Count
 from django.utils import timezone
 import re
@@ -220,8 +221,9 @@ class ProfessorViewSet(viewsets.ModelViewSet):
 class TCCViewSet(viewsets.ModelViewSet):
     queryset = TCC.objects.all()
     serializer_class = TCCSerializer
+    parser_classes = [MultiPartParser, FormParser]
     filter_backends = [filters.SearchFilter]
-    search_fields = ['titulo', 'resumo']
+    search_fields = ['titulo', 'resumo', 'aluno__nome', 'orientador__nome']
 
     @action(detail=False, methods=['get'])
     def estatisticas(self, request):
