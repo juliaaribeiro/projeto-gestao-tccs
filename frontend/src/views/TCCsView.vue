@@ -180,10 +180,18 @@
                   </div>
                 </td>
                 <td>
-                  <a v-if="tcc.arquivo" :href="fileUrl(tcc.arquivo)" target="_blank" class="file-link">
+                  <a
+                    v-if="tcc.arquivo"
+                    :href="tcc.arquivo"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="pdf-link"
+                  >
                     📥 PDF
                   </a>
-                  <span v-else class="no-file">—</span>
+                  <span v-else>
+                    —
+                  </span>
                 </td>
                 <td>
                   <button class="secondary-button" @click="updateStatus(tcc)">Salvar</button>
