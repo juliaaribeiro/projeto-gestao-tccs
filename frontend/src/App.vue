@@ -5,11 +5,18 @@
       <router-view />
     </main>
     <footer class="app-footer">
-      <span>API Django REST:</span>
+      <span>Sistema de Gestão de TCCs — UFLA</span>
+      <span class="footer-sep">·</span>
+      <span>API:</span>
       <a href="http://127.0.0.1:8000/api/" target="_blank">http://127.0.0.1:8000/api/</a>
     </footer>
   </div>
 </template>
+
+<script>
+import TopBar from './components/TopBar.vue'
+export default { components: { TopBar } }
+</script>
 
 <style scoped>
 .app-shell {
@@ -31,15 +38,17 @@ main {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 32px;
-  font-size: 0.82rem;
+  padding: 12px 32px;
+  font-size: 0.8rem;
   color: var(--text-3);
   border-top: 1px solid var(--border);
+  background: var(--surface);
 }
-.app-footer a { color: var(--indigo); transition: color 0.15s; }
-.app-footer a:hover { color: var(--cyan); }
+.footer-sep { color: var(--border-hover); }
+.app-footer a { color: var(--primary); }
+.app-footer a:hover { text-decoration: underline; }
 
 @media (max-width: 768px) {
-  main { padding: 20px 16px; }
+  main { padding: 18px 14px; }
 }
 </style>

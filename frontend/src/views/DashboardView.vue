@@ -1,14 +1,15 @@
 <template>
   <div class="dashboard">
 
-    <!-- Hero banner -->
-    <section class="hero card">
-      <div class="hero-content">
-        <h1 class="hero-title">Dashboard</h1>
-        <p class="hero-subtitle">Visão geral do sistema de Gestão de TCCs</p>
+    <!-- Cabeçalho da página -->
+    <section class="page-header card">
+      <div class="page-header__content">
+        <div class="page-header__eyebrow">Visão geral</div>
+        <h1 class="page-header__title">Dashboard</h1>
+        <p class="page-header__sub">Sistema de Gestão de Trabalhos de Conclusão de Curso</p>
       </div>
-      <div class="hero-meta">
-        <span class="hero-date">{{ today }}</span>
+      <div class="page-header__meta">
+        <span class="page-date">{{ today }}</span>
       </div>
     </section>
 
@@ -31,7 +32,6 @@
         :values="statusValues"
         type="doughnut"
       />
-
       <BarChart
         title="Top 10 Orientadores"
         :labels="orientadorLabels"
@@ -50,7 +50,6 @@ import api, { fetchList } from '../services/api'
 
 export default {
   components: { BarChart },
-
   setup() {
     const stats  = ref({ total_geral: 0, por_status: {}, por_orientador: {} })
     const counts = ref({ alunos: 0, professores: 0, cursos: 0, departamentos: 0 })
@@ -75,10 +74,10 @@ export default {
           fetchList('/departamentos/'),
         ])
         counts.value = {
-          alunos:       a.count ?? (a.results?.length ?? a.length ?? 0),
-          professores:  p.count ?? (p.results?.length ?? p.length ?? 0),
-          cursos:       c.count ?? (c.results?.length ?? c.length ?? 0),
-          departamentos:d.count ?? (d.results?.length ?? d.length ?? 0),
+          alunos:        a.count ?? (a.results?.length ?? a.length ?? 0),
+          professores:   p.count ?? (p.results?.length ?? p.length ?? 0),
+          cursos:        c.count ?? (c.results?.length ?? c.length ?? 0),
+          departamentos: d.count ?? (d.results?.length ?? d.length ?? 0),
         }
       } catch (e) { console.error('Erro ao carregar contagens', e) }
     }
@@ -88,30 +87,29 @@ export default {
     const statItems = computed(() => [
       {
         icon: '📄', label: 'TCCs', value: stats.value.total_geral,
-        bg: 'linear-gradient(135deg,rgba(99,102,241,.28),rgba(139,92,246,.22))',
+        bg: '#dce8f5',
       },
       {
         icon: '🎓', label: 'Alunos', value: counts.value.alunos,
-        bg: 'linear-gradient(135deg,rgba(139,92,246,.25),rgba(244,63,94,.18))',
+        bg: '#d4eddf',
       },
       {
         icon: '👩‍🏫', label: 'Professores', value: counts.value.professores,
-        bg: 'linear-gradient(135deg,rgba(6,182,212,.25),rgba(99,102,241,.22))',
+        bg: '#fef3cd',
       },
       {
         icon: '📚', label: 'Cursos', value: counts.value.cursos,
-        bg: 'linear-gradient(135deg,rgba(16,185,129,.25),rgba(6,182,212,.22))',
+        bg: '#fde8eb',
       },
       {
         icon: '🏢', label: 'Departamentos', value: counts.value.departamentos,
-        bg: 'linear-gradient(135deg,rgba(245,158,11,.25),rgba(244,63,94,.18))',
+        bg: '#e8f0d4',
       },
     ])
 
-    const statusLabels = computed(() => Object.keys(stats.value.por_status || {}))
-    const statusValues = computed(() => Object.values(stats.value.por_status || {}))
+    const statusLabels    = computed(() => Object.keys(stats.value.por_status || {}))
+    const statusValues    = computed(() => Object.values(stats.value.por_status || {}))
 
-    /* top 10 orientadores ordenados por quantidade */
     const orientadorEntries = computed(() =>
       Object.entries(stats.value.por_orientador || {})
         .sort((a, b) => b[1] - a[1])
@@ -130,41 +128,43 @@ export default {
 </script>
 
 <style scoped>
-.dashboard { display: flex; flex-direction: column; gap: 24px; }
+.dashboard { display: flex; flex-direction: column; gap: 22px; }
 
-/* ── Hero ── */
-.hero {
+/* ── Page header ── */
+.page-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(99,102,241,0.16) 0%,
-    rgba(139,92,246,0.12) 50%,
-    rgba(6,182,212,0.07) 100%
-  );
-  border-color: rgba(99,102,241,0.22);
+  border-left: 4px solid var(--primary);
+  border-radius: 0 var(--radius-l) var(--radius-l) 0;
 }
 
-.hero-title {
-  font-size: 1.65rem;
+.page-header__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.page-header__title {
+  font-size: 1.6rem;
   font-weight: 800;
-  margin-bottom: 5px;
-  background: linear-gradient(135deg, #e8f4ff 30%, #a5b4fc 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-1);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
 }
 
-.hero-subtitle { color: var(--text-2); font-size: 0.9rem; }
+.page-header__sub { color: var(--text-2); font-size: 0.9rem; }
 
-.hero-date {
-  font-size: 0.8rem;
+.page-date {
+  font-size: 0.78rem;
   color: var(--text-3);
   background: var(--surface-2);
   border: 1px solid var(--border);
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 999px;
   white-space: nowrap;
   text-transform: capitalize;
@@ -173,13 +173,13 @@ export default {
 /* ── Charts ── */
 .charts-grid {
   display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 22px;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
   align-items: start;
 }
 
 @media (max-width: 920px) {
   .charts-grid { grid-template-columns: 1fr; }
-  .hero-meta   { display: none; }
+  .page-header__meta { display: none; }
 }
 </style>

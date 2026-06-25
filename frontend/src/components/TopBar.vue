@@ -3,30 +3,33 @@
     <div class="topbar-inner">
 
       <router-link class="brand" to="/">
-        <span class="brand-icon">🎓</span>
+        <div class="brand-icon" aria-hidden="true">🎓</div>
         <span class="brand-name">Gestão de TCCs</span>
       </router-link>
 
-      <nav class="nav-links">
+      <nav class="nav-links" aria-label="Navegação principal">
         <router-link
           v-for="item in navItems"
           :key="item.to"
           :to="item.to"
           class="nav-link"
         >
-          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
           {{ item.label }}
         </router-link>
       </nav>
 
-      <button class="hamburger" @click="open = !open" aria-label="Menu">
-        <span :class="{ rotated: open }"></span>
-        <span :class="{ hidden: open }"></span>
-        <span :class="{ rotated2: open }"></span>
-      </button>
+      <div class="topbar-end">
+        <ThemePicker />
+        <button class="hamburger" @click="open = !open" aria-label="Abrir menu">
+          <span :class="{ rotated: open }"></span>
+          <span :class="{ hidden: open }"></span>
+          <span :class="{ rotated2: open }"></span>
+        </button>
+      </div>
     </div>
 
-    <nav v-if="open" class="mobile-nav">
+    <nav v-if="open" class="mobile-nav" aria-label="Menu mobile">
       <router-link
         v-for="item in navItems"
         :key="item.to"
@@ -34,25 +37,30 @@
         class="mobile-link"
         @click="open = false"
       >
-        {{ item.icon }} {{ item.label }}
+        <span aria-hidden="true">{{ item.icon }}</span> {{ item.label }}
       </router-link>
+      <div class="mobile-theme">
+        <ThemePicker />
+      </div>
     </nav>
   </header>
 </template>
 
 <script>
 import { ref } from 'vue'
+import ThemePicker from './ThemePicker.vue'
 
 export default {
+  components: { ThemePicker },
   setup() {
     const open = ref(false)
     const navItems = [
-      { to: '/',             icon: '📊', label: 'Dashboard'    },
-      { to: '/alunos',       icon: '🎓', label: 'Alunos'       },
-      { to: '/professores',  icon: '👩‍🏫', label: 'Professores'  },
-      { to: '/cursos',       icon: '📚', label: 'Cursos'       },
-      { to: '/departamentos',icon: '🏢', label: 'Departamentos'},
-      { to: '/tccs',         icon: '📄', label: 'TCCs'         },
+      { to: '/',              icon: '📊', label: 'Dashboard'    },
+      { to: '/alunos',        icon: '🎓', label: 'Alunos'       },
+      { to: '/professores',   icon: '👩‍🏫', label: 'Professores'  },
+      { to: '/cursos',        icon: '📚', label: 'Cursos'       },
+      { to: '/departamentos', icon: '🏢', label: 'Departamentos'},
+      { to: '/tccs',          icon: '📄', label: 'TCCs'         },
     ]
     return { open, navItems }
   },
@@ -61,21 +69,20 @@ export default {
 
 <style scoped>
 .topbar {
-  background: rgba(9, 14, 28, 0.88);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--border);
+  background: #ffffff;
+  border-bottom: 2px solid var(--primary);
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 2px 8px rgba(15, 26, 46, 0.08);
 }
 
 .topbar-inner {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 32px;
-  height: 62px;
+  gap: 8px;
+  padding: 0 28px;
+  height: 58px;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -85,25 +92,27 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-right: 20px;
+  margin-right: 24px;
   flex-shrink: 0;
+  text-decoration: none;
 }
+.brand:hover { text-decoration: none; }
 
 .brand-icon {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, var(--indigo), var(--violet));
-  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  background: var(--primary);
+  border-radius: var(--radius-m);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
 }
 
 .brand-name {
   font-weight: 800;
-  font-size: 1rem;
-  color: var(--text-1);
+  font-size: 0.95rem;
+  color: var(--primary);
   letter-spacing: -0.01em;
 }
 
@@ -119,22 +128,32 @@ export default {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 7px 12px;
+  padding: 6px 11px;
   border-radius: var(--radius-m);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--text-2);
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.12s, color 0.12s;
   white-space: nowrap;
+  text-decoration: none;
 }
-.nav-link:hover { background: rgba(99,102,241,0.1); color: var(--text-1); }
+.nav-link:hover { background: var(--primary-pale); color: var(--primary); text-decoration: none; }
 .nav-link.router-link-exact-active {
-  background: rgba(99,102,241,0.16);
-  color: #a5b4fc;
-  font-weight: 600;
+  background: var(--primary-pale);
+  color: var(--primary);
+  font-weight: 700;
+  border-bottom: 2px solid var(--primary);
 }
 
-.nav-icon { font-size: 0.9rem; }
+.nav-icon { font-size: 0.85rem; }
+
+/* ── End area ── */
+.topbar-end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
 
 /* ── Hamburger ── */
 .hamburger {
@@ -143,19 +162,18 @@ export default {
   gap: 5px;
   background: none;
   border: none;
-  padding: 8px;
-  margin-left: auto;
+  padding: 7px;
 }
 .hamburger span {
   display: block;
-  width: 22px;
+  width: 20px;
   height: 2px;
   background: var(--text-2);
   border-radius: 2px;
-  transition: transform 0.25s, opacity 0.25s, background 0.2s;
+  transition: transform 0.22s, opacity 0.22s;
   transform-origin: center;
 }
-.hamburger:hover span { background: var(--text-1); }
+.hamburger:hover span { background: var(--primary); }
 .hamburger span.rotated  { transform: translateY(7px) rotate(45deg); }
 .hamburger span.hidden   { opacity: 0; }
 .hamburger span.rotated2 { transform: translateY(-7px) rotate(-45deg); }
@@ -165,20 +183,30 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 10px 16px 14px;
+  padding: 8px 16px 12px;
   border-top: 1px solid var(--border);
+  background: #fff;
 }
 .mobile-link {
-  padding: 10px 14px;
+  padding: 9px 12px;
   border-radius: var(--radius-m);
   color: var(--text-2);
   font-size: 0.9rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.mobile-link:hover { background: rgba(99,102,241,0.1); color: var(--text-1); }
+.mobile-link:hover { background: var(--primary-pale); color: var(--primary); text-decoration: none; }
+.mobile-theme {
+  padding: 10px 12px 4px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
 
 @media (max-width: 860px) {
   .nav-links { display: none; }
   .hamburger { display: flex; }
-  .topbar-inner { padding: 0 20px; }
+  .topbar-inner { padding: 0 16px; }
 }
 </style>
