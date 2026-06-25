@@ -20,11 +20,29 @@
       </nav>
 
       <div class="topbar-end">
+       <button
+          class="font-btn"
+          @click="decreaseFont"
+          title="Diminuir fonte"
+        >
+          A-
+        </button>
+
+        <button
+          class="font-btn"
+          @click="increaseFont"
+          title="Aumentar fonte"
+        >
+          A+
+        </button>
+
         <ThemePicker />
-        <button class="hamburger" @click="open = !open" aria-label="Abrir menu">
-          <span :class="{ rotated: open }"></span>
-          <span :class="{ hidden: open }"></span>
-          <span :class="{ rotated2: open }"></span>
+
+        <button
+          class="hamburger"
+          @click="open = !open"
+          aria-label="Abrir menu"
+        >
         </button>
       </div>
     </div>
@@ -47,7 +65,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import ThemePicker from './ThemePicker.vue'
 
 export default {
@@ -55,21 +73,60 @@ export default {
   setup() {
     const open = ref(false)
     const navItems = [
-      { to: '/',              icon: '📊', label: 'Dashboard'    },
-      { to: '/alunos',        icon: '🎓', label: 'Alunos'       },
-      { to: '/professores',   icon: '👩‍🏫', label: 'Professores'  },
-      { to: '/cursos',        icon: '📚', label: 'Cursos'       },
-      { to: '/departamentos', icon: '🏢', label: 'Departamentos'},
-      { to: '/tccs',          icon: '📄', label: 'TCCs'         },
+      { to: '/', label: 'Dashboard'},
+      { to: '/alunos', label: 'Alunos'},
+      { to: '/professores', label: 'Professores'},
+      { to: '/cursos', label: 'Cursos'},
+      { to: '/departamentos', label: 'Departamentos'},
+      { to: '/tccs', label: 'TCCs'},
     ]
-    return { open, navItems }
+    const applyFontScale = (scale) => {
+      document.documentElement.style.setProperty(
+        '--font-scale',
+        scale
+      )
+    }
+
+    const increaseFont = () => {
+      let current = Number(
+        localStorage.getItem('fontScale') || '1'
+      )
+
+      current = Math.min(current + 0.1, 1.5)
+
+      localStorage.setItem('fontScale', current)
+
+      applyFontScale(current)
+    }
+
+    const decreaseFont = () => {
+      let current = Number(
+        localStorage.getItem('fontScale') || '1'
+      )
+
+      current = Math.max(current - 0.1, 0.8)
+
+      localStorage.setItem('fontScale', current)
+
+      applyFontScale(current)
+    }
+
+    onMounted(() => {
+      const scale = Number(
+        localStorage.getItem('fontScale') || '1'
+      )
+
+      applyFontScale(scale)
+    })
+
+    return {open, navItems, increaseFont, decreaseFont}
   },
 }
 </script>
 
 <style scoped>
 .topbar {
-  background: #ffffff;
+  background: var(--surface);
   border-bottom: 2px solid var(--primary);
   position: sticky;
   top: 0;
@@ -80,9 +137,9 @@ export default {
 .topbar-inner {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 28px;
-  height: 58px;
+  gap: 12px;
+  padding: 0 32px;
+  height: 72px;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -99,21 +156,22 @@ export default {
 .brand:hover { text-decoration: none; }
 
 .brand-icon {
-  width: 34px;
-  height: 34px;
+  width: 42px;
+  height: 42px;
   background: var(--primary);
+  color: white;
   border-radius: var(--radius-m);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .brand-name {
   font-weight: 800;
-  font-size: 0.95rem;
-  color: var(--primary);
-  letter-spacing: -0.01em;
+  font-size: 1.2rem;
+  color: var(--text-1);
 }
 
 /* ── Nav ── */
@@ -127,22 +185,27 @@ export default {
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 11px;
+  gap: 6px;
+  padding: 10px 16px;
   border-radius: var(--radius-m);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--text-2);
-  transition: background 0.12s, color 0.12s;
+  transition: all 0.2s ease;
   white-space: nowrap;
   text-decoration: none;
 }
-.nav-link:hover { background: var(--primary-pale); color: var(--primary); text-decoration: none; }
+
+.nav-link:hover {
+  background: var(--primary-pale);
+  color: var(--primary);
+}
+
 .nav-link.router-link-exact-active {
   background: var(--primary-pale);
   color: var(--primary);
   font-weight: 700;
-  border-bottom: 2px solid var(--primary);
+  border-bottom: 3px solid var(--primary);
 }
 
 .nav-icon { font-size: 0.85rem; }
@@ -180,22 +243,15 @@ export default {
 
 /* ── Mobile nav ── */
 .mobile-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 16px 12px;
-  border-top: 1px solid var(--border);
-  background: #fff;
+  background: var(--surface);
 }
 .mobile-link {
-  padding: 9px 12px;
+  padding: 12px 14px;
   border-radius: var(--radius-m);
   color: var(--text-2);
-  font-size: 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
   text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 .mobile-link:hover { background: var(--primary-pale); color: var(--primary); text-decoration: none; }
 .mobile-theme {
@@ -209,4 +265,26 @@ export default {
   .hamburger { display: flex; }
   .topbar-inner { padding: 0 16px; }
 }
+
+.font-btn {
+  width: 36px;
+  height: 36px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+
+  background: var(--surface);
+  color: var(--text-1);
+
+  font-weight: 700;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.font-btn:hover {
+  background: var(--primary-pale);
+  border-color: var(--primary);
+}
+
 </style>

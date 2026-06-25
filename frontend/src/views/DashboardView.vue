@@ -16,8 +16,7 @@
     <!-- Stat cards -->
     <div class="stat-cards">
       <div v-for="s in statItems" :key="s.label" class="stat-card">
-        <div class="stat-icon" :style="{ background: s.bg }">{{ s.icon }}</div>
-        <div>
+        <div class="stat-content">
           <div class="stat-label">{{ s.label }}</div>
           <div class="stat-value">{{ s.value ?? '—' }}</div>
         </div>
@@ -86,24 +85,19 @@ export default {
 
     const statItems = computed(() => [
       {
-        icon: '📄', label: 'TCCs', value: stats.value.total_geral,
-        bg: '#dce8f5',
+        label: 'TCCs', value: stats.value.total_geral,
       },
       {
-        icon: '🎓', label: 'Alunos', value: counts.value.alunos,
-        bg: '#d4eddf',
+        label: 'Alunos', value: counts.value.alunos,
       },
       {
-        icon: '👩‍🏫', label: 'Professores', value: counts.value.professores,
-        bg: '#fef3cd',
+        label: 'Professores', value: counts.value.professores,
       },
       {
-        icon: '📚', label: 'Cursos', value: counts.value.cursos,
-        bg: '#fde8eb',
+        label: 'Cursos', value: counts.value.cursos,
       },
       {
-        icon: '🏢', label: 'Departamentos', value: counts.value.departamentos,
-        bg: '#e8f0d4',
+        label: 'Departamentos', value: counts.value.departamentos,
       },
     ])
 
@@ -182,4 +176,23 @@ export default {
   .charts-grid { grid-template-columns: 1fr; }
   .page-header__meta { display: none; }
 }
+
+.stat-content {
+  width: 100%;
+  text-align: center;
+}
+
+.stat-card {
+  justify-content: center;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 2rem;
+}
+
 </style>

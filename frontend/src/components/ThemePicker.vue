@@ -1,36 +1,39 @@
 <template>
   <div class="theme-picker">
-    <span class="theme-picker__label">Fundo</span>
+
     <button
       v-for="s in swatches"
       :key="s.key"
-      class="theme-picker__swatch"
+      class="theme-btn"
       :class="{ active: current === s.key }"
-      :style="{ background: s.color }"
       :title="s.label"
-      :aria-label="'Fundo ' + s.label"
+      :aria-label="s.label"
       @click="pick(s.key)"
-    />
+    >
+      {{ s.icon }} {{ s.label }}
+    </button>
   </div>
 </template>
 
 <script>
 import { ref, watchEffect } from 'vue'
 
-const STORAGE_KEY = 'tcc-bg-theme'
+const STORAGE_KEY = 'tcc-theme'
 
 export default {
   setup() {
-    const saved = localStorage.getItem(STORAGE_KEY) || 'slate'
+    const saved = localStorage.getItem(STORAGE_KEY) || 'light'
     const current = ref(saved)
 
     const swatches = [
-      { key: 'white', color: '#ffffff', label: 'Branco'    },
-      { key: 'slate', color: '#f4f6f9', label: 'Cinza-azul'},
-      { key: 'warm',  color: '#faf8f5', label: 'Creme'     },
-      { key: 'blue',  color: '#eef3fa', label: 'Azul claro'},
-      { key: 'green', color: '#f0f7f0', label: 'Verde claro'},
-      { key: 'stone', color: '#f5f3ef', label: 'Pedra'     },
+      {
+        key: 'light',
+        label: 'Claro'
+      },
+      {
+        key: 'dark',
+        label: 'Escuro'
+      }
     ]
 
     const pick = (key) => {
@@ -39,10 +42,63 @@ export default {
     }
 
     watchEffect(() => {
-      document.documentElement.setAttribute('data-bg', current.value)
+      document.documentElement.setAttribute(
+        'data-theme',
+        current.value
+      )
     })
 
-    return { swatches, current, pick }
-  },
+    return {
+      current,
+      swatches,
+      pick
+    }
+  }
 }
 </script>
+
+<style scoped>
+.theme-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-picker__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+
+  background: var(--surface);
+  color: var(--text-1);
+
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.theme-btn:hover {
+  background: var(--primary-pale);
+  border-color: var(--primary);
+}
+
+.theme-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+</style>

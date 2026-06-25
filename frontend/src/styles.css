@@ -1,62 +1,71 @@
-/* ══════════════════════════════════════════════════
-   Sistema de Gestão de TCCs — Tema Acadêmico
-   ══════════════════════════════════════════════════ */
-
-/* ── Paleta de cores de fundo (selecionável pelo usuário) ── */
 :root {
-  --bg-theme: white;       /* alterado pelo ThemePicker */
+  --font-scale: 1;
 }
 
-/* Presets de fundo disponíveis */
-[data-bg="white"]  { --bg-theme: #ffffff; }
-[data-bg="slate"]  { --bg-theme: #f4f6f9; }
-[data-bg="warm"]   { --bg-theme: #faf8f5; }
-[data-bg="blue"]   { --bg-theme: #eef3fa; }
-[data-bg="green"]  { --bg-theme: #f0f7f0; }
-[data-bg="stone"]  { --bg-theme: #f5f3ef; }
+html {
+  font-size: calc(16px * var(--font-scale));
+}
 
-/* ── Tokens principais ── */
-:root {
-  color-scheme: light;
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-
-  /* Superfícies */
-  --bg:        var(--bg-theme, #f4f6f9);
-  --surface:   #ffffff;
+[data-theme="light"] {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
   --surface-2: #f0f2f6;
   --surface-3: #e4e8ef;
 
-  /* Bordas */
-  --border:       #d0d6e0;
+  --border: #d0d6e0;
   --border-hover: #a8b4c8;
 
-  /* Azul institucional */
-  --primary:       #1a4f8a;
+  --primary: #1a4f8a;
   --primary-light: #2563b0;
-  --primary-pale:  #dce8f5;
+  --primary-pale: #dce8f5;
   --primary-hover: #153e6e;
 
-  /* Acentos semânticos */
-  --emerald: #1e6e4f;
-  --amber:   #8a5c0a;
-  --rose:    #9b2335;
-  --cyan:    #0e6674;
-
-  /* Tipografia */
   --text-1: #0f1a2e;
   --text-2: #4a5568;
   --text-3: #7a8ba0;
+}
 
-  /* Forma */
-  --radius-s:  4px;
-  --radius-m:  6px;
-  --radius-l:  8px;
+[data-theme="dark"] {
+  --bg: #111827;
+  --surface: #1f2937;
+  --surface-2: #374151;
+  --surface-3: #4b5563;
+
+  --border: #4b5563;
+  --border-hover: #6b7280;
+
+  --primary: #60a5fa;
+  --primary-light: #93c5fd;
+  --primary-pale: rgba(96, 165, 250, 0.15);
+  --primary-hover: #bfdbfe;
+
+  --text-1: #f9fafb;
+  --text-2: #e5e7eb;
+  --text-3: #9ca3af;
+}
+
+:root {
+  color-scheme: light dark;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  --emerald: #1e6e4f;
+  --amber: #8a5c0a;
+  --rose: #9b2335;
+  --cyan: #0e6674;
+
+  --radius-s: 4px;
+  --radius-m: 6px;
+  --radius-l: 8px;
   --radius-xl: 10px;
 
-  /* Sombra discreta */
-  --shadow-s: 0 1px 3px rgba(15, 26, 46, 0.08), 0 1px 2px rgba(15, 26, 46, 0.05);
-  --shadow-m: 0 2px 8px rgba(15, 26, 46, 0.10), 0 1px 3px rgba(15, 26, 46, 0.06);
-  --shadow-l: 0 4px 16px rgba(15, 26, 46, 0.12), 0 2px 6px rgba(15, 26, 46, 0.07);
+  --shadow-s: 0 1px 3px rgba(15, 26, 46, 0.08),
+              0 1px 2px rgba(15, 26, 46, 0.05);
+
+  --shadow-m: 0 2px 8px rgba(15, 26, 46, 0.10),
+              0 1px 3px rgba(15, 26, 46, 0.06);
+
+  --shadow-l: 0 4px 16px rgba(15, 26, 46, 0.12),
+              0 2px 6px rgba(15, 26, 46, 0.07);
 }
 
 /* ── Reset base ── */
@@ -337,3 +346,47 @@ tr:hover td { background: var(--primary-pale); color: var(--text-1); transition:
   white-space: nowrap;
   pointer-events: none;
 }
+
+/* Acessibilidade */
+
+.font-btn {
+  width: 36px;
+  height: 36px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+
+  background: var(--surface);
+  color: var(--text-1);
+
+  font-weight: 700;
+  cursor: pointer;
+
+  transition: all .2s ease;
+}
+
+.font-btn:hover {
+  background: var(--primary-pale);
+  border-color: var(--primary);
+}
+
+.accessibility-panel {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 9999;
+}
+
+body,
+.card,
+table,
+input,
+select,
+textarea,
+button {
+  transition:
+    background-color .25s ease,
+    color .25s ease,
+    border-color .25s ease;
+}
+
