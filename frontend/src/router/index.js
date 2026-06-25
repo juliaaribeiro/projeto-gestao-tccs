@@ -13,6 +13,7 @@ const routes = [
   { path: '/cursos', name: 'Cursos', component: CursosView },
   { path: '/departamentos', name: 'Departamentos', component: DepartamentosView },
   { path: '/tccs', name: 'TCCs', component: TCCsView },
+  { path: '/tccs/novo', name: 'Novo Tcc', component: () => import('../views/TCCForm.vue')}
 ]
 
 const router = createRouter({

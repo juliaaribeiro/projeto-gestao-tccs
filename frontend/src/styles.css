@@ -390,3 +390,25 @@ button {
     border-color .25s ease;
 }
 
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.success-message {
+  background: #e6ffed;
+  color: #1a7f37;
+  border: 1px solid #2ecc71;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
